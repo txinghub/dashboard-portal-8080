@@ -1,0 +1,28 @@
+=== HERMES AGENT DASHBOARD LINKS ===
+
+TAILSCALE INFO:
+- IP: 100.121.49.116
+- Domain: openclaw-hermes.ts.net
+
+DASHBOARD LINKS:
+
+1. DASHBOARD UTAMA (Portal Proyek)
+   http://100.121.49.116:8080
+   http://openclaw-hermes.ts.net:8080
+
+2. SIMPLE HTTP SERVER
+
+3. STNK MONITORING DASHBOARD
+   http://100.121.49.116:8086
+   http://openclaw-hermes.ts.net:8086
+
+4. SIMPLE SERVER
+
+5. INDEX.HTML DI ROOT
+   File: /root/index.html
+   Redirect ke: http://100.121.49.116:8080
+
+CATATAN:
+- Semua link hanya bisa diakses via Tailscale VPN
+- Pastikan Tailscale terhubung untuk mengakses
+- Dashboard utama (port 8080) adalah portal ke semua proyek
