@@ -3,355 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Proyek Hermes Agent</title>
+    <title>Dashboard Portal - Hermes Agent</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0f;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e0e0e0;
         }
         
-        .dashboard-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            margin: 30px auto;
-            padding: 30px;
+        /* Animated background */
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(14, 165, 233, 0.06) 0%, transparent 50%);
+            z-index: -1;
         }
         
-        .header {
+        /* Navbar */
+        .navbar {
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Header */
+        .portal-header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid var(--primary-color);
+            padding: 60px 20px 40px;
         }
-        
-        .header h1 {
-            color: var(--primary-color);
-            font-weight: 700;
+        .portal-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e0e0e0 0%, #a855f7 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
         }
-        
-        .header p {
-            color: #666;
+        .portal-header p {
+            color: #888;
             font-size: 1.1rem;
         }
+        .server-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            color: #a5b4fc;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+        .server-badge i { color: #22c55e; }
         
-        .project-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            margin-bottom: 25px;
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .status-item {
+            text-align: center;
+        }
+        .status-item .number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .status-item .label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Dashboard Cards */
+        .dashboard-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
             height: 100%;
         }
-        
-        .project-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+        .dashboard-card:hover::before { transform: scaleX(1); }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.1);
+            background: rgba(255,255,255,0.05);
         }
         
-        .card-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 20px;
+        .card-icon {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .icon-vehicle { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+        .icon-stnk-admin { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+        .icon-stnk-view { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+        .icon-wdc { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .card-desc {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
             font-weight: 600;
+            margin-bottom: 15px;
         }
-        
-        .card-body {
-            padding: 25px;
-        }
-        
-        .status-badge {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        
         .status-active {
-            background-color: #d4edda;
-            color: #155724;
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        .status-active .dot {
+            width: 6px; height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         
-        .status-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .btn-access {
-            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
+        .port-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
             font-weight: 600;
+            background: rgba(255,255,255,0.05);
+            color: #aaa;
+            font-family: monospace;
+        }
+        
+        .card-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .card-links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
             transition: all 0.3s ease;
         }
-        
-        .btn-access:hover {
-            background: linear-gradient(135deg, #2980b9, var(--secondary-color));
-            color: white;
-            transform: scale(1.05);
+        .link-tailscale {
+            background: rgba(99, 102, 241, 0.1);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        .link-tailscale:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: #c7d2fe;
+        }
+        .link-local {
+            background: rgba(255,255,255,0.03);
+            color: #888;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .link-local:hover {
+            background: rgba(255,255,255,0.06);
+            color: #bbb;
         }
         
-        .server-info {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        
+        /* Footer */
         .footer {
             text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            color: #666;
-            font-size: 0.9rem;
+            padding: 40px 20px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+        .footer i { color: #6366f1; }
+        
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        .fade-in:nth-child(4) { animation-delay: 0.4s; }
+        
+        /* Update time */
+        .update-time {
+            text-align: center;
+            color: #555;
+            font-size: 0.8rem;
+            margin: 30px 0;
         }
         
-        .icon-large {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-        }
-        
-        .access-url {
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            word-break: break-all;
-            margin: 10px 0;
+        @media (max-width: 768px) {
+            .portal-header h1 { font-size: 1.8rem; }
+            .dashboard-card { padding: 20px; }
+            .status-bar { gap: 15px; flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
-    <div class="container dashboard-container">
-        <div class="header">
-            <h1><i class="fas fa-tachometer-alt"></i> Dashboard Proyek Hermes Agent</h1>
-            <p>Kumpulan semua proyek monitoring dan sistem yang telah dikembangkan</p>
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Akses dari mana saja menggunakan Tailscale IP: <strong>100.121.49.116</strong>
+    <div class="bg-gradient"></div>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cube me-2"></i>Dashboard Portal
+            </a>
+            <span class="text-muted" style="font-size:0.85rem;">
+                <i class="fas fa-circle text-success me-1" style="font-size:8px;"></i>Active
+            </span>
+        </div>
+    </nav>
+    
+    <!-- Header -->
+    <div class="container">
+        <div class="portal-header">
+            <h1><i class="fas fa-th-large me-3"></i>Dashboard Utama</h1>
+            <p>Akses semua dashboard monitoring dalam satu tempat</p>
+            <div class="server-badge">
+                <i class="fas fa-circle"></i>
+                linggos-mac-mini.tail92127.ts.net
+                <span class="badge bg-dark ms-2">macOS</span>
             </div>
         </div>
         
-        <div class="row">
-            <!-- Proyek 1: STNK Monitoring Dashboard -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card project-card">
-                    <div class="card-header">
-                        <i class="fas fa-car"></i> STNK Monitoring Dashboard
+        <!-- Status Bar -->
+        <div class="status-bar fade-in">
+            <div class="status-item">
+                <div class="number" id="totalDashboards">4</div>
+                <div class="label">Total Dashboard</div>
+            </div>
+            <div class="status-item">
+                <div class="number" style="color:#4ade80;" id="activeCount">4</div>
+                <div class="label">Active</div>
+            </div>
+            <div class="status-item">
+                <div class="number" style="color:#888;" id="inactiveCount">0</div>
+                <div class="label">Inactive</div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Cards -->
+        <div class="row g-4 mt-2">
+            
+            <!-- Card 1: STNK Admin/CRUD 8087 -->
+            <div class="col-lg-4 col-md-6 fade-in">
+                <div class="dashboard-card d-flex flex-column">
+                    <div class="card-icon icon-stnk-admin">
+                        <i class="fas fa-edit"></i>
                     </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <i class="fas fa-file-invoice-dollar icon-large"></i>
-                        </div>
-                        <h5 class="card-title">Monitoring STNK & Pajak Kendaraan</h5>
-                        <p class="card-text">Sistem monitoring jatuh tempo STNK dan pajak kendaraan dengan notifikasi WhatsApp.</p>
-                        
-                        <div class="mb-3">
-                            <span class="status-badge status-active">
-                                <i class="fas fa-circle"></i> Aktif
-                            </span>
-                            <span class="badge bg-primary">Python</span>
-                            <span class="badge bg-success">Flask</span>
-                            <span class="badge bg-warning">WhatsApp</span>
-                        </div>
-                        
-                        <div class="access-url">
-                            http://100.121.49.116:8085
-                        </div>
-                        
-                        <a href="http://100.121.49.116:8085" target="_blank" class="btn btn-access w-100">
-                            <i class="fas fa-external-link-alt"></i> Akses Dashboard
+                    <div class="card-title">STNK Dashboard (Admin)</div>
+                    <div class="card-desc">Dashboard STNK dengan fitur CRUD lengkap — Tambah, Edit, dan Hapus data kendaraan</div>
+                    <div>
+                        <span class="status-indicator status-active">
+                            <span class="dot"></span> Active
+                        </span>
+                        <span class="port-badge ms-2">Port 8087</span>
+                    </div>
+                    <div class="card-links">
+                        <a href="https://linggos-mac-mini.tail92127.ts.net:8087" target="_blank" class="link-tailscale">
+                            <i class="fas fa-external-link-alt"></i>
+                            Buka via Tailscale
+                        </a>
+                        <a href="http://100.122.46.110:8087" target="_blank" class="link-local">
+                            <i class="fas fa-network-wired"></i>
+                            http://100.122.46.110:8087
                         </a>
                     </div>
                 </div>
             </div>
             
-            <!-- Proyek 2: Vehicle Monitoring System -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card project-card">
-                    <div class="card-header">
-                        <i class="fas fa-truck-monster"></i> Vehicle Monitoring System
+            <!-- Card 2: STNK Viewer 8099 -->
+            <div class="col-lg-4 col-md-6 fade-in">
+                <div class="dashboard-card d-flex flex-column">
+                    <div class="card-icon icon-stnk-view">
+                        <i class="fas fa-eye"></i>
                     </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <i class="fas fa-chart-line icon-large"></i>
-                        </div>
-                        <h5 class="card-title">Sistem Monitoring Kendaraan Lengkap</h5>
-                        <p class="card-text">Dashboard lengkap untuk monitoring semua kendaraan dengan analisis data.</p>
-                        
-                        <div class="mb-3">
-                            <span class="status-badge status-active">
-                                <i class="fas fa-circle"></i> Aktif
-                            </span>
-                            <span class="badge bg-primary">Python</span>
-                            <span class="badge bg-success">Flask</span>
-                            <span class="badge bg-info">Bootstrap</span>
-                        </div>
-                        
-                        <div class="access-url">
-                            http://100.121.49.116:8086
-                        </div>
-                        
-                        <a href="http://100.121.49.116:8086" target="_blank" class="btn btn-access w-100">
-                            <i class="fas fa-external-link-alt"></i> Akses Dashboard
+                    <div class="card-title">STNK Dashboard (Viewer)</div>
+                    <div class="card-desc">Dashboard STNK read-only untuk melihat data kendaraan tanpa bisa mengubah</div>
+                    <div>
+                        <span class="status-indicator status-active">
+                            <span class="dot"></span> Active
+                        </span>
+                        <span class="port-badge ms-2">Port 8099</span>
+                    </div>
+                    <div class="card-links">
+                        <a href="https://linggos-mac-mini.tail92127.ts.net:8099" target="_blank" class="link-tailscale">
+                            <i class="fas fa-external-link-alt"></i>
+                            Buka via Tailscale
+                        </a>
+                        <a href="http://100.122.46.110:8099" target="_blank" class="link-local">
+                            <i class="fas fa-network-wired"></i>
+                            http://100.122.46.110:8099
                         </a>
                     </div>
                 </div>
             </div>
-            
-            <!-- Proyek 3: WhatsApp Bridge -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card project-card">
-                    <div class="card-header">
-                        <i class="fab fa-whatsapp"></i> WhatsApp Bridge
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <i class="fas fa-bridge icon-large"></i>
-                        </div>
-                        <h5 class="card-title">Bridge WhatsApp - Hermes Agent</h5>
-                        <p class="card-text">Sistem integrasi WhatsApp untuk komunikasi dua arah dengan Hermes Agent.</p>
-                        
-                        <div class="mb-3">
-                            <span class="status-badge status-active">
-                                <i class="fas fa-circle"></i> Aktif
-                            </span>
-                            <span class="badge bg-danger">Node.js</span>
-                            <span class="badge bg-success">OpenClaw</span>
-                            <span class="badge bg-warning">WhatsApp</span>
-                        </div>
-                        
-                        <div class="access-url">
-                            http://100.121.49.116:3000
-                        </div>
-                        
-                        <a href="http://100.121.49.116:3000" target="_blank" class="btn btn-access w-100">
-                            <i class="fas fa-external-link-alt"></i> Akses Bridge
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Proyek 4: Token Tracking System -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card project-card">
-                    <div class="card-header">
-                        <i class="fas fa-chart-bar"></i> Token Tracking System
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <i class="fas fa-table icon-large"></i>
-                        </div>
-                        <h5 class="card-title">Sistem Pelacakan Token Usage</h5>
-                        <p class="card-text">Pelacakan penggunaan token AI dengan laporan Excel otomatis.</p>
-                        
-                        <div class="mb-3">
-                            <span class="status-badge status-inactive">
-                                <i class="fas fa-circle"></i> Backup Only
-                            </span>
-                            <span class="badge bg-primary">Python</span>
-                            <span class="badge bg-success">Excel</span>
-                            <span class="badge bg-info">Cron Job</span>
-                        </div>
-                        
-                        <div class="access-url">
-                            Scripts: /root/hermes_backup/
-                        </div>
-                        
-                        <button class="btn btn-secondary w-100" disabled>
-                            <i class="fas fa-download"></i> Backup Available
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
 
+            <!-- Card 3: WDC 500GB Explorer 8088 -->
+            <div class="col-lg-4 col-md-6 fade-in">
+                <div class="dashboard-card d-flex flex-column">
+                    <div class="card-icon icon-wdc">
+                        <i class="fas fa-hdd"></i>
+                    </div>
+                    <div class="card-title">WDC 500GB Explorer</div>
+                    <div class="card-desc">Daftar isi lengkap harddisk WDC 500GB — koleksi musik FLAC, foto keluarga, dan lainnya</div>
+                    <div>
+                        <span class="status-indicator status-active">
+                            <span class="dot"></span> Active
+                        </span>
+                        <span class="port-badge ms-2">Port 8088</span>
+                    </div>
+                    <div class="card-links">
+                        <a href="https://linggos-mac-mini.tail92127.ts.net:8088" target="_blank" class="link-tailscale">
+                            <i class="fas fa-external-link-alt"></i>
+                            Buka via Tailscale
+                        </a>
+                        <a href="http://100.122.46.110:8088" target="_blank" class="link-local">
+                            <i class="fas fa-network-wired"></i>
+                            http://100.122.46.110:8088
+                        </a>
+                    </div>
+                </div>
+            </div>
             
-            <!-- Proyek 6: Skills Library -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card project-card">
-                    <div class="card-header">
-                        <i class="fas fa-book"></i> Skills Library
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <i class="fas fa-graduation-cap icon-large"></i>
-                        </div>
-                        <h5 class="card-title">Library Skills Hermes Agent</h5>
-                        <p class="card-text">Kumpulan semua skills yang telah dikembangkan untuk berbagai tugas.</p>
-                        
-                        <div class="mb-3">
-                            <span class="status-badge status-active">
-                                <i class="fas fa-circle"></i> Aktif
-                            </span>
-                            <span class="badge bg-primary">Markdown</span>
-                            <span class="badge bg-success">Documentation</span>
-                            <span class="badge bg-info">Workflow</span>
-                        </div>
-                        
-                        <div class="access-url">
-                            ~/.hermes/skills/
-                        </div>
-                        
-                        <button class="btn btn-secondary w-100" onclick="showSkillsCount()">
-                            <i class="fas fa-list"></i> Lihat Skills
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
         
-        <div class="server-info">
-            <h4><i class="fas fa-server"></i> Informasi Server</h4>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Server Name:</strong> openclaw-hermes</p>
-                    <p><strong>Tailscale IP:</strong> 100.121.49.116</p>
-                    <p><strong>Tailscale Domain:</strong> openclaw-hermes.tail92127.ts.net</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>User:</strong> txingzhang@gmail.com (主任 - 小甜甜)</p>
-                    <p><strong>Pemilik Sistem:</strong> +6285261919099</p>
-                    <p><strong>Dashboard Port:</strong> 8080 (Utama)</p>
-                    <p><strong>Status:</strong> <span class="badge bg-success">Online</span></p>
-                    <p><strong>Last Updated:</strong> 21 April 2026</p>
-                </div>
-            </div>
+        <div class="update-time">
+            <i class="fas fa-sync-alt me-1"></i> Diperbarui: <span id="updateTime"></span>
         </div>
         
-        <div class="footer">
-            <p>© 2026 Hermes Agent Dashboard | Dibuat untuk 主人 (小甜甜)</p>
-            <p>Semua proyek dapat diakses dari mana saja melalui Tailscale network</p>
-            <p><i class="fas fa-mobile-alt"></i> Akses mobile-friendly</p>
-        </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer -->
+    <div class="footer">
+        <i class="fas fa-heart me-1"></i> Hermes Agent Dashboard Portal &mdash; Powered by <strong style="color:#888;">小甜甜</strong>
+    </div>
+    
     <script>
-        function showSkillsCount() {
-            alert('Total Skills: 26 skills dalam berbagai kategori\n- software-development: 12 skills\n- data-science: 2 skills\n- devops: 4 skills\n- mlops: 8 skills\n- user-preferences: 2 skills');
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                timeZone: 'Asia/Jakarta'
+            };
+            document.getElementById('updateTime').textContent = now.toLocaleDateString('id-ID', options) + ' WIB';
         }
-        
-        // Auto-refresh setiap 5 menit untuk update status
-        setTimeout(() => {
-            location.reload();
-        }, 300000); // 5 menit
+        updateTime();
+        setInterval(updateTime, 1000);
     </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

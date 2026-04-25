@@ -20,8 +20,6 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         # Serve file berdasarkan path
         if self.path == '/':
-            self.path = '/index.html'
-        elif self.path == '/dashboard':
             self.path = '/project_dashboard.html'
         
         # Serve file statis
@@ -47,8 +45,9 @@ def main():
     print("HERMES AGENT PROJECT DASHBOARD SERVER")
     print("=" * 60)
     
-    # Ganti directory ke root
-    os.chdir('/root')
+    # Ganti directory ke direktori dashboard-portal
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
     
     # Dapatkan info server
     hostname, local_ip = get_server_info()
