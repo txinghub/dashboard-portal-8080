@@ -18,7 +18,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
 # Start server
-with socketserver.TCPServer(("0.0.0.0", PORT), MyHandler) as httpd:
+with socketserver.TCPServer(("127.0.0.1", PORT), MyHandler) as httpd:
     print(f"Server running at http://0.0.0.0:{PORT}")
     print(f"Dashboard: http://100.121.49.116:{PORT}")
     print(f"Press Ctrl+C to stop")
