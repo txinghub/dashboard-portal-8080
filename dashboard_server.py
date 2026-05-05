@@ -31,6 +31,7 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
         '/stnk': ('127.0.0.1', 8087),
         '/wdc': ('127.0.0.1', 8088),
         '/contact': ('127.0.0.1', 8082),
+        '/telegram-users': ('127.0.0.1', 8765),
     }
 
     def do_GET(self):
