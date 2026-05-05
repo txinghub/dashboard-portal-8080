@@ -16,6 +16,7 @@ import re
 from datetime import datetime
 from urllib.request import Request, urlopen
 from urllib.error import URLError
+from urllib.parse import urlparse
 
 PORT = 8080
 HOST = '127.0.0.1'  # Wajib 127.0.0.1 karena Tailscale Serve handle external
@@ -23,9 +24,17 @@ HOST = '127.0.0.1'  # Wajib 127.0.0.1 karena Tailscale Serve handle external
 SKILLS_DIR = os.path.expanduser("~/.hermes/skills")
 
 class DashboardHandler(http.server.SimpleHTTPRequestHandler):
-    """Custom handler untuk dashboard + API skills"""
+    """Custom handler untuk dashboard + API skills + proxy to other dashboards"""
+
+    # Proxy routes: path prefix -> (host, port)
+    PROXY_ROUTES = {
+        '/stnk': ('127.0.0.1', 8087),
+        '/wdc': ('127.0.0.1', 8088),
+        '/contact': ('127.0.0.1', 8082),
+    }
 
     def do_GET(self):
+        # Handle API endpoints
         if self.path == '/api/skills':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
@@ -44,10 +53,82 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(data, indent=2).encode())
             return
 
+        # Handle proxy routes
+        for path_prefix, (host, port) in self.PROXY_ROUTES.items():
+            if self.path.startswith(path_prefix):
+                self.proxy_request(host, port)
+                return
+
+        # Default: serve static files
         if self.path == '/':
             self.path = '/project_dashboard.html'
-
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+    def do_POST(self):
+        """Handle POST requests for proxied API endpoints"""
+        for path_prefix, (host, port) in self.PROXY_ROUTES.items():
+            if self.path.startswith(path_prefix):
+                self.proxy_request(host, port, method='POST')
+                return
+        self.send_error(404, 'Not Found')
+
+    def proxy_request(self, host, port, method='GET'):
+        """Forward request to backend dashboard server"""
+        # Strip the path prefix when forwarding
+        proxy_path = self.path
+        for path_prefix in self.PROXY_ROUTES:
+            if self.path.startswith(path_prefix):
+                proxy_path = self.path[len(path_prefix):]
+                if not proxy_path:
+                    proxy_path = '/'
+                break
+
+        url = f'http://{host}:{port}{proxy_path}'
+        try:
+            # Forward headers (excluding hop-by-hop headers)
+            headers = {}
+            for key, value in self.headers.items():
+                if key.lower() not in ('host', 'connection', 'keep-alive', 'transfer-encoding'):
+                    headers[key] = value
+
+            req = Request(url, method=method, headers=headers)
+            if method in ('POST', 'PUT') and self.headers.get('Content-Length'):
+                content_length = int(self.headers['Content-Length'])
+                req.data = self.rfile.read(content_length)
+
+            with urlopen(req, timeout=10) as response:
+                self.send_response(response.status)
+                for key, value in response.headers.items():
+                    if key.lower() not in ('transfer-encoding', 'connection', 'keep-alive'):
+                        self.send_header(key, value)
+                self.end_headers()
+                self.wfile.write(response.read())
+        except URLError as e:
+            # Handle HTTP errors (like 401, 404, 500) properly
+            if hasattr(e, 'code'):
+                # It's an HTTPError - forward the actual status code
+                self.send_response(e.code)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                if hasattr(e, 'read'):
+                    body = e.read()
+                    if body:
+                        self.wfile.write(body)
+                    else:
+                        self.wfile.write(f'{{"error": "{str(e)}"}}'.encode())
+                else:
+                    self.wfile.write(f'{{"error": "{str(e)}"}}'.encode())
+            else:
+                # True network error
+                self.send_response(502)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(f'{{"error": "Proxy error: {str(e)}"}}'.encode())
+        except Exception as e:
+            self.send_response(502)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(f'{{"error": "{str(e)}"}}'.encode())
 
     def log_message(self, format, *args):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
