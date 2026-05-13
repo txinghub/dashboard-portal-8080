@@ -105,7 +105,22 @@ pct exec 108 -- ss -tlnp | grep 8787
 curl http://192.168.1.14:8787/
 ```
 
----
+## ⚠️ KNOWN ISSUES & GOTCHAS
+
+### server.log Tidak Update Secara Real-Time
+
+**GEJALA:** Setelah deploy server.py dengan port baru (misal 8787), `/tmp/roti.log` masih显示 port lama (8788).
+
+**PENYEBAB:** Flask menulis log hanya SAAT STARTUP. Isi log tidak berubah meski aplikasi sudah berjalan di port berbeda.
+
+**SOLUSI:** Selalu pakai `ss -tlnp` untuk verifikasi port aktif, BUKAN `cat /tmp/roti.log`:
+```bash
+# ✅ BENAR - langsung show port aktif
+pct exec 108 -- ss -tlnp | grep 8787
+
+# ❌ SALAH - log tidak update real-time
+pct exec 108 -- cat /tmp/roti.log | grep PORT
+```
 
 ## ⚠️ KNOWN ISSUES & GOTCHAS
 
